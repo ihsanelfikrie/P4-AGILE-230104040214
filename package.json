@@ -7,13 +7,13 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest --runInBand",
-    "lint:api": "spectral lint openapi/api.yaml",
-    "mock": "prism mock openapi/api.yaml",
-    "typecheck": "tsc --noEmit",
-    "dev:orders": "ts-node services/order-service/src/server.ts",
-    "dev:notif": "ts-node services/notification-service/src/server.ts"
-  },
+  "lint:api": "spectral lint openapi/api.yaml",
+  "mock": "prism mock openapi/api.yaml",
+  "typecheck": "tsc --noEmit",
+  "test": "jest --runInBand",
+  "dev:orders": "ts-node services/order-service/src/server.ts",
+  "dev:notif": "ts-node services/notification-service/src/server.ts"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
