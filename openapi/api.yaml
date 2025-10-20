@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: Mini E-Commerce API
+  description: Praktikum WSE - Design-First Approach
+  version: 1.0.0
+  contact:
+    name: Your Name
+    email: your.email@example.com
+
+servers:
+  - url: http://localhost:5002
+    description: Order Service
+  - url: http://localhost:5003
+    description: Notification Service
+
+tags:
+  - name: orders
+    description: Order management
+  - name: notifications
+    description: Notification service
+
+paths:
+  /orders:
+    post:
+      tags:
+        - orders
+      operationId: createOrder
+      summary: Create a new order
+      description: Create a new order for a specified product and quantity. Returns the created order details.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            examples:
+              valid:
+                summary: Valid order
+                value:
+                  productId: "PROD-001"
+                  quantity: 2
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                id: "ORD-12345"
+                productId: "PROD-001"
+                quantity: 2
+                status: "created"
+                createdAt: "2025-01-15T10:30:00Z"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Validation failed"
+                code: "VALIDATION_ERROR"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Unauthorized"
+                code: "UNAUTHORIZED"
+
+  /notifications:
+    get:
+      tags:
+        - notifications
+      operationId: getNotifications
+      summary: Get notifications
+      description: Retrieve a list of notifications for the authenticated user, with optional limit parameter.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of notifications
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  total:
+                    type: integer
+              example:
+                notifications:
+                  - id: "NOTIF-001"
+                    message: "Order shipped"
+                    timestamp: "2025-01-15T10:00:00Z"
+                  - id: "NOTIF-002"
+                    message: "Payment received"
+                    timestamp: "2025-01-15T09:30:00Z"
+                total: 2
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Unauthorized"
+                code: "UNAUTHORIZED"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateOrderRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: string
+          minLength: 1
+          example: "PROD-001"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+          enum: [created, pending, completed]
+        createdAt:
+          type: string
+          format: date-time
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
